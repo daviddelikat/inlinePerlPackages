@@ -1,0 +1,25 @@
+
+# see TEE.txt   ...  a very useful package for handling script output
+
+# Log4perl sends messages to STDERR...
+
+# by using Log4perl messages from other packages can be retrieved
+
+#use Log::Log4perl;		# nothing imported
+#use Log::Log4perl '$log';	# $log imported
+use Log::Log4perl ':easy';	# import DEBUG/ERROR/WARN... methods
+use Log::Log4perl::Level;
+#Log::Log4perl->easy_init($DEBUG);
+Log::Log4perl->easy_init($WARN);
+#Log::Log4perl->easy_init($INFO);
+
+
+# from the documentation:
+# In ":easy" mode, "Log::Log4perl" will instantiate a stealth logger and
+# introduce the convenience functions "TRACE", "DEBUG()", "INFO()",
+# "WARN()", "ERROR()", "FATAL()", and "ALWAYS" into the package
+# namespace.  These functions simply take messages as arguments and
+# forward them to the stealth loggers methods ("debug()", "info()", and
+# so on).
+
+
