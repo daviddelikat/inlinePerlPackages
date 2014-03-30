@@ -1,0 +1,33 @@
+
+# a ~very~ simple package to print a status message with any available information
+
+{package STATUS;
+    use Guard;
+    my @statusCodeRefs;
+    sub push { shift; push @statusCodeRefs, shift; guard { pop @statusCodeRefs } }
+    sub print { print join( '; ',map { $_->() } @statusCodeRefs), "\n"; }
+}
+
+# slightly more complicated print method
+
+    sub print { if( @statusCodeRefs ) { 
+			print join( ';', map { $_->() } @statusCodeRefs ), "\n"; 
+		} else { print "running\n" } }
+
+# example:
+
+sub workerfunction {
+
+   my($numberToProcess,$counter) = (50,0);
+   
+   my $cleanup = STATUS->push( sub { 'label:' . int($counter / $numberToProcess * 100) . '%' } );
+
+   while( $counter ++ < $numberToProcess ) {
+
+        STATUS->print;
+
+   }
+
+}
+
+

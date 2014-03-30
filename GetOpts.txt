@@ -1,0 +1,33 @@
+
+# a summary of features...
+
+use Getopt::Long;
+
+$result = GetOptions (
+	"option:s" => \my $optionalOption,  # value is optional(:)
+	"length=i" => \my $integer,  	    # value is required(=)
+    	"file=s"   => \my $string,   
+	"verbose"  => \my $verboseFlag, 
+	"array=s" => \my @array,	    # automatically handles repeats
+	"arrayref=s@" => \my $arrayref,
+	"hash=s"  => \my %hash,		    # repeats of <key>=<value>
+	"hashref=s%"  => \my $hashref,
+	"sub=s" => sub {
+			my($option,$value) = @_;
+			# do something...
+		},
+	"sub4hash=s%" => sub {
+			my($option,$name,$value) = @_;
+			# do something...
+		},
+	'site|sites|s=s'      => sub { push @sites, split /,/, $_[1]; },
+);
+
+# an alternative to using a 'sub' for coma lists:
+
+GetOptions ("library=s" => \@libfiles);
+@libfiles = split(/,/,join(',',@libfiles));
+
+die "!FINISH";   # use this to tell GetOptions to stop processing options ( like '--' )
+
+

@@ -1,0 +1,23 @@
+
+# use this first one if you already have the STACK
+# package in your script
+
+{ package QUEUE;   # FIFO
+# a simple queue object for processing elements
+our @ISA = qw/ STACK /;
+sub push { push @{$_[0]}, $_[1] }
+}
+
+
+# this one can stand alone
+
+{ package QUEUE;   # FIFO
+# a simple queue object for processing elements
+sub new { bless [ ], ( ref $_[0] || $_[0] ) }
+sub top { $_[0][0] }
+sub topa { $_[0][0] ||= [ ] }
+sub toph { $_[0][0] ||= { } }
+sub pop { shift @{$_[0]} }
+sub push { push @{$_[0]}, $_[1] }
+}
+

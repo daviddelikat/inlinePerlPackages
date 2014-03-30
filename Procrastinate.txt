@@ -1,0 +1,30 @@
+
+# when you want to wait until the _very_ ~last~ .minute.
+
+perl <<'EOF'
+use Guard;
+print "start of script\n";
+{
+my $guard = guard { print "guard in block\n" };
+sub mySub { $guard; }
+}
+our $oguard = guard { print "our guard\n" };
+my $mguard = guard { print "my guard\n" };
+END { print "end block\n"; }
+sub bSub { $mguard }
+print "end of script\n";
+EOF
+start of script
+end of script
+end block
+my guard
+our guard
+guard in block
+
+
+
+
+# print just after all other cleanup is done:
+{my $x = guard { print "finished at " . localtime . "\n" }; sub theguard { $x }}
+
+

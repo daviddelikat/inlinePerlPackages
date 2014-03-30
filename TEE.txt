@@ -1,0 +1,48 @@
+
+# a really simple package that makes a log of your script output
+
+{package TEE;
+require Tie::Handle;
+use IO::All;
+my($f1,$f2,$logname);
+
+BEGIN {
+    @TEE::ISA = qw/ Tie::Handle /;
+    #$f1 = io '/dev/tty'; # has occasional benefits over the next line
+    open $f1, '>&STDOUT'; # usually the best way...
+    $logname = $0 . '_' . time() . '.log';
+    $f2 = io($logname);
+}
+sub usePager { $f1 = io '|less'; }
+sub quiet { undef $f1; }
+
+sub TIEHANDLE { bless [ ], TEE; }
+sub FILENO{ fileno $f1 }
+sub CLOSE { undef $f1; undef $f2; }
+sub WRITE { $_ && $_->print( $_[1] ) for ( $f1, $f2 ); }
+sub logname { $logname }
+}
+tie *STDOUT, TEE;
+tie *STDERR, TEE;
+
+print "started at " . localtime . "\n";
+
+# this needs to wait for the first output...
+unlink 'latest.log'; link TEE->logname, 'latest.log';
+
+use Guard;  # this will run as near the end as you can get...
+# move it to the physical end of the file if you think it could go later...
+{my $g=guard { print "finished at " . localtime . "\n" }; sub guardianOfTheEnd { $g } }
+
+
+use Getopt::Long;
+
+my $verbose = 1;
+
+GetOptions (
+    "verbose|v"  => sub { $verbose ++ },
+    "quiet|q"  => sub { $verbose = 0; TEE->quiet },
+    "pager"  => sub { TEE->usePager },
+);
+
+
