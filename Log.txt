@@ -22,4 +22,7 @@ Log::Log4perl->easy_init($WARN);
 # forward them to the stealth loggers methods ("debug()", "info()", and
 # so on).
 
+# change log level
+Log::Log4perl−>get_logger->level($DEBUG);
+
 
