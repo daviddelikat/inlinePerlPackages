@@ -4,10 +4,8 @@
 perl <<'EOF'
 use Guard;
 print "start of script\n";
-{
-my $guard = guard { print "guard in block\n" };
+my $guard = guard { print "guard in sub\n" };
 sub mySub { $guard; }
-}
 our $oguard = guard { print "our guard\n" };
 my $mguard = guard { print "my guard\n" };
 END { print "end block\n"; }
@@ -19,7 +17,7 @@ end of script
 end block
 my guard
 our guard
-guard in block
+guard in sub
 
 
 
