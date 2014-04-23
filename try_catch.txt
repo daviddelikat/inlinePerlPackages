@@ -1,0 +1,20 @@
+
+sub catch(&) { $_[0] }
+sub try(&;$) {
+    my ($try, $catch) = @_;
+    my $error = 'database error';
+    my $ret;
+    local $SIG{INT} = sub { die "Got SIGINT\n" };
+    local $SIG{KILL} = sub { die "Got SIGKILL\n" };
+    local($@);
+    $ret = eval { $try->() };
+    $error = $@;
+    if ($error) {
+        $SIG{INT} = sub { warn 'Ignoring SIGINT, caught error.' };
+        $SIG{KILL} = sub { warn 'Ignoring SIGKILL, caught error.' };
+        local $_ = $error;
+        $ret = $catch->() if $catch;
+    }
+    return $ret;
+}
+

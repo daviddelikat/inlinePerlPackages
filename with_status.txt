@@ -1,0 +1,19 @@
+
+our $status_level = 0;  # non-lexical for localization
+my $status_calls;
+
+sub with_status($&) {
+    my ($status, $block) = @_;
+    my $calls = ++$status_calls;
+    my $indent = ' ' x (4*$status_level);
+    local $| = 1;
+    print "\n", $indent, $status, "...";
+    local $status_level = $status_level + 1;
+    my $ret = $block->();
+    if ($calls != $status_calls) {
+        print "\n", $indent;
+    }
+    print 'Done.';
+    return $ret;
+}
+
