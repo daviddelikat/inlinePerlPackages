@@ -1,0 +1,51 @@
+
+* Why use inline packages?
+
+my favorite reason to use inline packages is for customization.
+
+I frequently come up with a new feature that I may never need
+again so I can add it into the code inlined in a script.  if I find 
+it extra usefull, I push it into my collection.  Still if I don't
+need it I can leave it out.
+
+second favorite reason is integration. sometimes the purpose of the package
+can be augmented by accessing features directly.  sometimes the inline package
+pulls fromt he main script; other times the main script pokes into the inline
+package.   depends on the need.   most of the packages add features that need
+to be packages so having a bug-free framework makes it faster than trying to
+pull it out of my head...
+
+third reason is simplicity...  who really ~needs~ a seperate file somewhere to
+implement a stack object?
+
+* why do I do inline the way I do?
+
+so, I use this:
+
+{package <name>;  # method a
+...
+}
+
+for inserting packages in scripts.
+
+it is also possible to do this two other ways:
+
+package <name> {  # method b
+...
+};
+
+or...
+
+package <name>;   # method c
+...
+package <othername>;
+...
+
+I would rather use method b; but it is relatively new. not quite sure when it
+was introduced to perl syntax, but it fails on some older versions of perl.
+Method c does not provide scope for 'package lexical variables' which is fine
+if you don't need them, but about half of the time I do. also you have to make
+sure the 'othername' is the actual name the rest of the file should use; it 
+makes simple cut and paste less simple so I don't use it.
+
+
