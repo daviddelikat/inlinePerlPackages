@@ -1,0 +1,82 @@
+
+here is an expanded/documented version of TEE.
+
+{package TEE;   # my favorite way to do inline packages; see 'why.txt'
+
+require Tie::Handle;  # provides 90% of required methods for tied handles
+
+use IO::All;   # handles lots of details regarding files and handles
+my $f1; # first file handle
+my $f2; # second file handle
+my $logname; # store the logname incase we want to use it later
+
+BEGIN {
+    @TEE::ISA = qw/ Tie::Handle /;  # inherit from Tie::Handle
+
+    #$f1 = io '/dev/tty'; # use this when you know that redirection
+    			# is not desired; there is another benefit
+			# I forget what it is now, but it is rarely needed...
+			# also will not work outside of Un*x systems...
+
+    open $f1, '>&STDOUT'; # usually the best way to clone STDOUT
+
+    # second file handle points to a unique log
+    $logname = $0 . '_' . time . '.log';
+    $f2 = io($logname);
+}
+sub usePager { $f1 = io '|less'; } # changes stdout to a pager
+sub quiet { undef $f1; }   # turn off stdout
+
+# the essential tie requirements...  other bits are provided by Tie::Handle
+sub TIEHANDLE { bless [ ], TEE; }
+sub FILENO { fileno $f1 }  # not generally required, but IO::All uses it.
+sub CLOSE {
+       # I use undef here for simplicity.  if the tied handle gets
+       # closed more than once ( chances are it will ); I would have
+       # to test the handles before calling close.  undefining them
+       # lets perl handle anything else that needs to be done
+   undef $f1; undef $f2;
+} 
+sub WRITE {
+    # condensed version: $_ && $_->print( $_[1] ) for ( $f1, $f2 );
+    my($this, $scalar, $length, $offset) = @_;
+    # because we always use 'print' we can ignore $length and $offset...
+    for my $handle ( $f1, $f2 ) {
+        if( $handle ) {
+	    $handle->print( $scalar );
+	}
+    }
+}
+sub logname { $logname }
+}
+tie *STDOUT, TEE;
+tie *STDERR, TEE;
+# at this point all errors will go to the log, if desired, the above 'tie'
+# commands could be put in a BEGIN block and compile errors would be logged also.
+
+print "started at " . localtime . "\n";
+
+# here we create a 'latest.log' link to the most recent log file
+# probably could be a package method, I just have not added it yet...
+unlink 'latest.log'; link TEE->logname, 'latest.log';
+
+use Guard;  # this will run as near the end as you can get...
+# move it to the physical end of the file if you think it could go later...
+{my $g=guard { print "finished at " . localtime . "\n" }; sub guardianOfTheEnd { $g } }
+
+
+# here is some simple code to implement the pager/quiet features
+# from the commandline.  I have in some cases integrated Log4Perl
+# with Tee, I'll be sure to add that code to this repository eventually...
+
+use Getopt::Long;
+
+my $verbose = 1;
+
+GetOptions (
+    "verbose|v"  => sub { $verbose ++ },
+    "quiet|q"  => sub { $verbose = 0; TEE->quiet },
+    "pager"  => sub { TEE->usePager },
+);
+
+
