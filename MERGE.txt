@@ -1,0 +1,21 @@
+
+like Tee, but just push everything out the same handle...
+this has the benefit of synchronizing text on STDERR
+with text on STDOUT better than using shell redirect.
+
+{package MERGE;
+ my $f1;
+ BEGIN {
+    require Tie::Handle;
+    require IO::Handle
+    @MERGE::ISA = qw/ Tie::Handle /;
+    open $f1, '>&STDOUT';
+ }
+ sub TIEHANDLE { bless [ ], MERGE; }
+ sub FILENO { fileno $f1 }
+ sub CLOSE { undef $f1; }
+ sub WRITE { $f1->print( $_[1] ) if $f1; }
+}
+tie *STDOUT, MERGE;
+tie *STDERR, MERGE;
+
