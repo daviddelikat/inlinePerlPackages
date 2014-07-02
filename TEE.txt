@@ -10,14 +10,14 @@ BEGIN {
     @TEE::ISA = qw/ Tie::Handle /;
     #$f1 = io '/dev/tty'; # has occasional benefits over the next line
     open $f1, '>&STDOUT'; # usually the best way...
-    $logname = $0 . '_' . time() . '.log';
+    $logname = $0 . '_' . time . '.log';
     $f2 = io($logname);
 }
 sub usePager { $f1 = io '|less'; }
 sub quiet { undef $f1; }
 
 sub TIEHANDLE { bless [ ], TEE; }
-sub FILENO{ fileno $f1 }
+sub FILENO { fileno $f1 }
 sub CLOSE { undef $f1; undef $f2; }
 sub WRITE { $_ && $_->print( $_[1] ) for ( $f1, $f2 ); }
 sub logname { $logname }
