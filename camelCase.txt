@@ -1,0 +1,52 @@
+
+# this is a simplification of String::CamelCase
+# use it if for some reason you can't use the module
+
+# a quick camel case conversion tool...
+
+sub qcc {lcfirst join( '', map{s/\W+//g;ucfirst $_}split /[- _|;:]+/,join(' ',@_));}
+
+# other examples:
+sub qcc { lcfirst join( '', map { ucfirst $_ } split /[- _|;:]+/, join(' ',@_) ); }
+sub qcc { join( '', map { ucfirst $_ } split /:+/, join(':',@_) ); }
+sub qcc { lcfirst join( '', map { ucfirst $_ } split /[- _]+/, join(' ',@_) ); }
+sub qcc { join( '', map { ucfirst $_ } split /\W+/, shift ); }
+
+
+# with comments
+sub qcc {	# quickCamelCase
+    lcfirst    # remove this for if the first letter should be uppercase
+      join( '',   # 'final' step is to merge the list, no space between words
+         map { s/\W//g ;	# remove non-word characters
+	 	ucfirst $_ }  # each word gets the first letter uppercased
+	 split /[- _|;:]+/,  # split the text on various connector characters
+	 			# customize for your preferences;
+				# this has extra chars for soem cases I use
+				# if you include '-' it should always be first
+				# otherwise it is a character range ( last is
+				# invalid )
+	    join(' ',@_)	# if you want to pass in an array, join with
+	    			# any char that is in the split in the line above
+				# otherwise you can replace join with shift
+	);
+}
+
+# reverse camel case
+
+sub qucc {join '',map{/[A-Z]/?('-',lc($_)):($_)} split /([A-Z]+)/,lcfirst(shift)}
+
+# with comments
+sub qucc {  # quick-un-camel-case
+    join '',			# merge the string...
+        map {
+	    /[A-Z]/		# if the current segment is upper case
+	        ?('-',lc($_))	# insert a '-' in front and change to lower case
+		:($_)		# otherwise just return it
+	    }
+	    split /([A-Z]+)/,	# split on one or more uppercase, parens cause
+	    			# matched texty to be included in the list
+	    	lcfirst(shift)  # change first char to lowercase, otherwise we may
+				# get a '-' at the beginning of the token
+}
+
+
