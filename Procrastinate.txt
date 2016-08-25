@@ -4,8 +4,13 @@
 perl <<'EOF'
 use Guard;
 print "start of script\n";
-my $guard = guard { print "guard in sub\n" };
-sub mySub { $guard; }
+{package TheOtherPackage; use Guard;
+my $guard = guard { print "guard in first package sub\n" }; sub mySub { $guard; }}
+{my $guard = guard { print "guard in main sub\n" }; sub mySub { $guard; }}
+{package ThisPackage; use Guard;
+my $guard = guard { print "guard in second package sub\n" }; sub mySub { $guard; }}
+{package AnotherPackage; use Guard;
+my $guard = guard { print "guard in package sub pushed to main\n" }; sub main::mySub { $guard; }}
 our $oguard = guard { print "our guard\n" };
 my $mguard = guard { print "my guard\n" };
 END { print "end block\n"; }

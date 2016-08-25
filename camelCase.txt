@@ -49,4 +49,23 @@ sub qucc {  # quick-un-camel-case
 				# get a '-' at the beginning of the token
 }
 
+# here is a variation I stole from Olof Johansson's Transmission::Client module
+# https://metacpan.org/source/OLOF/Transmission-Client-0.0804/lib/Transmission/AttributeRole.pm
+
+sub _camel2Normal {
+    $_[0]->_convert( $_[1], sub {
+        local $_ = $_[0];
+        tr/-/_/;
+        s/([A-Z]+)/{ "_" .lc($1) }/ge;
+        return $_;
+    } );
+}
+sub _normal2Camel {
+    $_[0]->_convert( $_[1], sub {
+        local $_ = $_[0];
+        tr/_/-/;
+        s/_(\w)/{ uc($1) }/ge; # wild guess...
+        return $_;
+    } );
+}
 

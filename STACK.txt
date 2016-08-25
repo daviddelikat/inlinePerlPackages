@@ -3,10 +3,15 @@
 # a simple stack object for processing elements
 sub new { bless [ ], ( ref $_[0] || $_[0] ) }
 sub top { $_[0][0] }
-sub topa { $_[0][0] ||= [ ] }
-sub toph { $_[0][0] ||= { } }
+sub topA { $_[0][0] ||= [ ] }
+sub topH { $_[0][0] ||= { } }
 sub pop { shift @{$_[0]} }
 sub push { unshift @{$_[0]}, $_[1] }
+sub pushA { unshift @{$_[0]}, [ ] }
+sub pushH { unshift @{$_[0]}, { } }
+#sub push { my $s=shift; unshift @$s, @_ }
+sub size { scalar( @{$_[0]} ) }
+sub count { scalar( @{$_[0]} ) }
 }
 
 

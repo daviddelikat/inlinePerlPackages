@@ -1,0 +1,83 @@
+
+# a simple script for processing a list of items that may grow....
+
+# use QUEUE or STACK depending on desired order...
+#####  QUEUE will process breadth first, STACK will process depth first
+
+my $items = QUEUE->new;
+
+my @failed;
+
+sub process {
+
+    while( $items->count ) {
+print $items->count, " items\n";
+        my $a = $items->pop;
+        if( $a->run->retry ) {
+            $items->push($a);
+        } elsif( $a->fail ) {
+            push @failed, $a;
+        }
+    }
+
+}
+
+
+# create items using these classes:
+
+{ package __::Entry;
+
+sub new { return bless { d => $_[1] }, $_[0] };
+sub run {
+    my $d = $_[0]{d};
+    if( is a list? $d ) {
+        for my $a ( @ in $d ) {
+            $items->push(__::Entry->new($a));
+        }
+    } elsif( cando? $d ) {
+        $items->push(__::Process->new($d));
+    }
+    return $_[0];
+}
+sub fail { 0 }
+sub retry { 0 }
+sub success { 1 }
+
+}
+
+{ package __::Process;
+
+sub new { return bless { qw/d 0 f 0 r 0/, d => $_[1] }, $_[0] };
+sub run {
+    if( task ) {
+        $_[0]{f} = 1;
+        $_[0]{r}++;
+    } else {
+        $_[0]{f} = 0;
+        $_[0]{d} = 1;
+        $count++;
+    }
+    return $_[0];
+}
+sub fail { $_[0]{f} }
+sub retry { $_[0]->fail && $_[0]{r} < 3 }
+sub success { $_[0]{d} and not $_[0]{f} }
+
+}
+
+
+# startt hings off like this:
+$items->push(__::Entry->new(''));
+process;
+
+
+# a simple final status:
+END {
+    if ( @failed ) {
+        use Data::Dumper; print Dump [@failed];
+    }
+    print "processed $count items\n";
+}
+
+# if desired use STATUS to track progress....
+

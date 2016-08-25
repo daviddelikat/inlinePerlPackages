@@ -4,22 +4,69 @@
     use Guard;
     my @statusCodeRefs;
     sub push { shift; push @statusCodeRefs, shift; guard { pop @statusCodeRefs } }
-    sub print { print join( '; ',map { $_->() } @statusCodeRefs), "\n"; }
+    sub print { print join( '; ',map {join '',$_->()} @statusCodeRefs), "\n"; }
 }
 
 # slightly more complicated print method
 
     sub print { if( @statusCodeRefs ) { 
-			print join( ';', map { $_->() } @statusCodeRefs ), "\n"; 
+			print join(';',map {join '',$_->()} @statusCodeRefs ),"\n"; 
 		} else { print "running\n" } }
 
 # example:
 
 sub workerfunction {
    my($numberToProcess,$counter) = (50,0);
-   my $cleanup = STATUS->push( sub { 'label:' . int($counter / $numberToProcess * 100) . '%' } );
+   my $cleanup = STATUS->push( sub { 'label:', int($counter / $numberToProcess * 100), '%' } );
    while( $counter ++ < $numberToProcess ) {
         STATUS->print;
    }
+}
+
+much more complicated version...
+
+{package STATUS;
+{package STATUS::X;
+sub new { return bless [ $_[1] ], $_[0] }
+sub _run {   # run the code ref & update data
+    my @data = $_[0][0]->();
+    $_[0][1][6] = join '',@data;
+    my $count = int($data[0]);
+    $count = int($data[1]) if !$count && $data[1] =~ /^\d+/ ; # looks like a number
+    $_[0][1][0] ||= $count; # set initial count
+    return if $_[0][1][1] == $count;   # don't process if the count has not changed
+    $_[0][1][1] = $count; #  set current count
+    my $curtime = time;
+    my $seconds = $curtime - $_[0][1][3];
+    $_[0][1][3] = $curtime; #  set current time
+    push @{$_[0][1][4]}, $seconds;
+    my $avg = eval join '+', @{$_[0][1][4]};
+    if( defined $_[0][1][5] ) {  # previous average
+        # add in the previous average giving it twice the weight of a single element
+        $avg += $_[0][1][5] * 2;
+        $avg /= @{$_[0][1][4]} + 2;   # scalar context for array
+    } else {
+        $avg /= @{$_[0][1][4]} ;
+    }
+    $_[0][1][5] = $avg;
+    shift @{$_[0][1][4]} if @{$_[0][1][4]} > 3;
+}
+sub _init {   # set some initial values
+    		# initcount, cur count, start,  cur,  prev#seconds, avg#seconds
+    $_[0][1] =   [ undef,       0,       time,   time, [    ],     0 ];
+}
+sub status {
+    $_[0]->_init unless $_[0][1];
+    $_[0]->_run;
+    my $runtime  = $_[0][1][3] - $_[0][1][2];   # cur time - start time
+    my $timeleft = $_[0][1][5] * $_[0][1][1];   # avg#second * cur count
+    $_[0][1][6] . ",runtime=$runtime,timeleft=$timeleft' ;
+}
+}
+    use Guard;
+    my @statusCodeRefs;
+    sub push { shift; push @statusCodeRefs, Status::X->new(shift);
+    			return guard { pop @statusCodeRefs } }
+    sub print { print join( '; ',map { $_->status } @statusCodeRefs), "\n"; }
 }
 
