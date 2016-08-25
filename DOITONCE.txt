@@ -1,0 +1,68 @@
+
+run a bit of code only once; sometime in the future....
+
+currently untested...
+
+# using a package:
+
+# much more generic and potentially more versatile
+# but I'm not sure the extra options are useful
+
+{package DOITONCE;
+sub new { my $c = shift; return bless [ @_ ], $c; }
+sub run { my $s = shift; $_->() for @$s; @$s = (); $s } 
+sub add { my $s = shift; push @$s, @_; $s } 
+}
+
+usage:
+
+my $dio = DOITONCE->new( sub { some('task') } );
+
+... later ...
+
+$dio->add( sub( another('task') } );
+
+...  even later  ...
+
+$dio->run;
+
+...
+
+# this allows you to manage tasks and targets over a wide
+# range of opportunities...
+
+--------------
+
+# this is a very simple version
+# can be inserted in to seperate namespaces
+# if needed more than once, but within a
+# package only allows one target; though
+# 'DOITNOW' can be placed multiple lacations
+# it will only run all the stuff once.
+
+# I really like the simplicity of this...
+
+{
+my @bits;
+sub DOITONCE (&) { push @bits,shift; }
+sub DOITNOW () { if( @bits ) { $_->() for @bits ; @bits=() } }
+}
+
+usage:
+
+DOITONCE { process something or initialize something }  # can be called more than once...
+
+...   do some various tasks....
+
+DOITNOW;   # can be called more than once; but only processes once
+
+...  finish processing...
+
+
+# note that if you call 'DOITONCE' after calling 'DOITNOW' the next time you call
+# 'DOITNOW' the recent calls will be processed...  this may or may not be what you want...
+
+# note that one could insert this into multiple packages in a single file...
+# ( at least in some versions of perl )
+
+

@@ -66,7 +66,7 @@ sub success { $_[0]{d} and not $_[0]{f} }
 }
 
 
-# startt hings off like this:
+# start things off like this:
 $items->push(__::Entry->new(''));
 process;
 
@@ -80,4 +80,65 @@ END {
 }
 
 # if desired use STATUS to track progress....
+
+# here are classes for processing a directory of files:
+
+my $source;
+my $target;
+
+{ package __::Entry;
+
+sub new { return bless { f => $_[1] }, $_[0] };
+sub fail { 0 }
+sub retry { 0 }
+sub success { 1 }
+
+sub ls {
+   my $path =  shift;
+   my @res;
+   if( opendir my $dh, $path ) {
+      @res = readdir( $dh );
+   } else {
+       die "failed to open dir $path\n"
+   }
+#print "path=$path -> @{[ join ',', @res ]}\n";
+   return @res;
+}
+
+sub run {
+    my $f = $_[0]{f};
+    my $s="$source/$f";
+    if( -d $s ) {
+        for my $a ( ls($s) ) {
+            next if $a eq '.' or $a eq '..';
+            $items->push(__::Entry->new("$f/$a"));
+        }
+    } elsif( -f $s ) {
+        my $t="$target/$f";
+        $items->push(__::Process->new($s,$t));
+    }
+    return $_[0];
+}
+}
+
+{ package __::Process;
+
+sub new { return bless { s => $_[1], t => $_[2], qw/d 0 f 0 r 0/ }, $_[0] };
+sub fail { $_[0]{f} }
+sub retry { $_[0]->fail && $_[0]{r} < 3 }
+sub success { $_[0]{d} and not $_[0]{f} }
+
+sub run {
+    return $_[0]  unless -f $_[0]{s}; # in case it disapears...
+    if( system( 'cp', $_[0]{s}, $_[0]{t} ) ) {
+        $_[0]{f} = 1;
+        $_[0]{r}++;
+    } else {
+        $_[0]{f} = 0;
+        $_[0]{d} = 1;
+        $copies++;
+    }
+    return $_[0];
+}
+}
 

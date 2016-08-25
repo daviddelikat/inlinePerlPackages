@@ -1,0 +1,42 @@
+
+# the simple version...
+# gives a basic idea of where these things get run...
+
+perl <<EOP
+
+END       { print "END block       - the code has finished running\n" }
+INIT      { print "INIT block      - getting ready to run\n" }
+CHECK     { print "CHECK block     - compiler is done with all files\n" }
+BEGIN     { print "BEGIN block     - compiler is working\n" }
+UNITCHECK { print "UNITCHECK block - compiler finished the current file\n" }
+            print "                - the code is running\n";
+
+EOP
+
+
+# the complex version...  shows multiple everything...
+# I copied this from official perl documentation...
+
+perl <<EOP
+
+print         "10. Ordinary code runs at runtime.\n";
+END { print   "16.   So this is the end of the tale.\n" }
+INIT { print  " 7. INIT blocks run FIFO just before runtime.\n" }
+UNITCHECK {
+        print " 4.   And therefore before any CHECK blocks.\n" }
+CHECK { print " 6.   So this is the sixth line.\n" }
+print         "11.   It runs in order, of course.\n";
+BEGIN { print " 1. BEGIN blocks run FIFO during compilation.\n" }
+END { print   "15.   Read perlmod for the rest of the story.\n" }
+CHECK { print " 5. CHECK blocks run LIFO after all compilation.\n" }
+INIT { print  " 8.   Run this again, using Perl's -c switch.\n" }
+print         "12.   This is anti-obfuscated code.\n";
+END { print   "14. END blocks run LIFO at quitting time.\n" }
+BEGIN { print " 2.   So this line comes out second.\n" }
+UNITCHECK {
+        print " 3. UNITCHECK blocks run LIFO after each file is compiled.\n" }
+INIT { print  " 9.   You'll see the difference right away.\n" }
+print         "13.   It merely _looks_ like it should be confusing.\n";
+
+EOP
+

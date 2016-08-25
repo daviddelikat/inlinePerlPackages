@@ -1,0 +1,56 @@
+
+... entirely untested ...
+
+first off ... STATE vs STATUS...
+
+STATUS helps you see what your program is doing
+STATE helps your program track what it is doing
+these definitions are merely for this project...
+other places I tend to define then differently...
+( and with more complexity .. )
+
+the purpose of this snippet is to easily store program state
+so that later instances can resume processing...
+
+{package STATE;
+
+sub add {
+# add an object to the STATE class
+# object must imlement required methods for save/resume
+}
+
+sub _stateFile {
+    # select a reasonable filename
+    # based on the script name and current working dir
+    # perhaps based on parameters also...
+}
+
+sub _resume {
+# read the saved state file
+# load each state object with the saved data
+}
+
+sub _save {
+# fetch the save data from each object and write it to the state file
+}
+
+END { STATE->_save; }
+
+INIT { STATE->_resume; }
+
+}
+
+
+state objects should implement 2 methods...
+
+sub _saveState {
+   # returns a hash of values which can be written in JSON
+}
+
+sub _restoreState {
+   # takes a hash as a parameter, creates an object and stores it 
+   # where it is needed for normal runtime
+}
+
+
+

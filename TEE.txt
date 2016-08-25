@@ -22,8 +22,10 @@ sub CLOSE { undef $f1; undef $f2; }
 sub WRITE { $_ && $_->print( $_[1] ) for ( $f1, $f2 ); }
 sub logname { $logname }
 }
-tie *STDOUT, TEE;
-tie *STDERR, TEE;
+INIT {
+    tie *STDOUT, TEE;
+    tie *STDERR, TEE;
+}
 
 print "started at " . localtime . "\n";
 
