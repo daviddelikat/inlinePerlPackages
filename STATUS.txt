@@ -1,7 +1,12 @@
 # a ~very~ simple package to print a status message with any available information
 
+# there is an assumption here that all status modules are properly nested...
+# in the event that a child status object needs to last longer than its parent
+# a more complex mechanism for object removal needs to be made...
+
+# requires the contents of GUARD.txt or 'use Guard;'
+
 {package STATUS;
-    use Guard;
     my @statusCodeRefs;
     sub push { shift; push @statusCodeRefs, shift; guard { pop @statusCodeRefs } }
     sub print { print join( '; ',map {join '',$_->()} @statusCodeRefs), "\n"; }
