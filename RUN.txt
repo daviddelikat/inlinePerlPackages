@@ -1,0 +1,116 @@
+ 
+# simple output capture...
+
+
+#  does not work with localized STDOUT/ERR ...
+#perl -e 'open STDOUT,">","temp"; open STDERR,">","terr";system("ls -C");close STDOUT;warn "---\n",`cat temp`,"---\n";'
+
+
+# along with a simple tempfile package...
+
+{package __::TEMPFILES;
+    sub new { bless [ ], $_[0]; } 
+    sub DESTROY { unlink @{$_[0]}; } 
+
+    sub newFile {
+        unshift @{$_[0]}, '/tmp/temp'  . $0 . $$ . time . rand ;
+        return $_[0][0];
+    }
+}
+
+# super simple; does not capture system output...
+
+sub capture (&) {
+    my($code) = shift;
+    my %res;
+
+    eval {local(*STDOUT,*STDERR);
+      local($|) = 1;
+        open STDOUT, '>', \( $res{stdout} ) ;
+        open STDERR, '>', \( $res{stderr} ) ;
+
+        local($@,$!);
+        $res{return} = eval { $code->() };
+        $res{bang} = $!;
+        $res{at} = $@;
+    };
+    chomp %res;
+    return \%res;
+}
+
+sub slurp {
+    local( $/, @ARGV ) = ( wantarray ? $/ : undef, @_ ); 
+    return <ARGV>;
+}
+
+# like system command
+# this is an alternative to qx(...)
+# essential benefit is the seperation of stdout&stderr
+# plus general error collection...
+
+sub syscap {
+    my @cmd = @_;
+    my %res;
+    my $tfac = __::TEMPFILES->new;
+    my $stdout = $tfac->newFile;
+    my $stderr = $tfac->newFile;
+
+    eval {
+        open my $tso, '>&STDOUT';
+        open my $tse, '>&STDERR';
+        open STDERR, '>', $stderr or die "failed to open '$stderr'";
+        open STDOUT, '>', $stdout or die "failed to open '$stdout'";
+        local($|,$!) = (1);
+	$res{return} = @_ == 1 ? system $_[0] : system { $_[0] } @_;
+        $res{bang} = $!;
+        open STDOUT, '>&'.fileno($tso);
+        open STDERR, '>&'.fileno($tse);
+    };
+#system("ls -l $stderr $stdout");
+    $res{stdout} = slurp($stdout);
+    $res{stderr} = slurp($stderr);
+    chomp %res;
+    return \%res;
+}
+
+
+# full capture with coderef
+
+sub capture2 (&) {
+    my $cmd = shift;
+    my %res;
+    my $tfac = __::TEMPFILES->new;
+    my $stdout = $tfac->newFile;
+    my $stderr = $tfac->newFile;
+    open my $tso, '>&STDOUT';
+    open my $tse, '>&STDERR';
+    open STDERR, '>', $stderr or die "failed to open '$stderr'";
+    open STDOUT, '>', $stdout or die "failed to open '$stdout'";
+    local($|,$!) = (1);
+    $res{return} = eval { $cmd->() };
+    $res{bang} = $!;
+    $res{at} = $@;
+    open STDOUT, '>&'.fileno($tso);
+    open STDERR, '>&'.fileno($tse);
+    $res{stdout} = slurp($stdout);
+    $res{stderr} = slurp($stderr);
+    chomp %res;
+    return \%res;
+}
+
+
+# test...
+
+print "test1 ...  ", (syscap('echo "ok"')->{stdout}||'nok'), "\n";
+print "test2 ...  ", ((capture { print 'ok' } )->{stdout}||'nok'), "\n";
+
+print "test3 ...  ", ( syscap 'pwd' )->{stdout},"\n";
+#print "test3.a .  ", join ':', %{ syscap 'pwd' },"\n";
+#print "test3.b .  ", join ':', %{ syscap 'ls -C' },"\n";
+
+#print "test4 ...  ", join ':', %{ syscap '/bin/bash', '-c', 'echo "hi"' },"\n";
+print "test4 ...  ", ( syscap '/bin/bash', '-c', 'echo "hi"' )->{stdout},"\n";
+
+print "test5 ...  ", ((capture { warn "ok\n" } )->{stderr}||'nok'), "\n";
+print "test6 ...  ", ((capture { die "ok\n" } )->{at}||'nok'), "\n";
+
