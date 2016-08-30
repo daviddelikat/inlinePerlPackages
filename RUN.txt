@@ -2,8 +2,9 @@
 # simple output capture...
 
 
-#  does not work with localized STDOUT/ERR ...
-#perl -e 'open STDOUT,">","temp"; open STDERR,">","terr";system("ls -C");close STDOUT;warn "---\n",`cat temp`,"---\n";'
+# system calls do not work with localized STDOUT/ERR ...
+#perl -e 'open STDOUT,">","temp";system("ls -C");close STDOUT;warn "---\n",`cat temp`,"---\n";'
+#perl -e 'local(*STDOUT);open STDOUT,">","temp";system("ls -C");close STDOUT;warn "---\n",`cat temp`,"---\n";'
 
 
 # along with a simple tempfile package...
@@ -19,6 +20,10 @@
 }
 
 # super simple; does not capture system output...
+# ONLY works with localized handles; ONLY captures perl IO
+#perl -e 'open STDOUT,">",\(my $x);system("ls -C");print "junk\n";close STDOUT;warn "---\n",$x,"---\n";'
+#perl -e 'local(*STDOUT);open STDOUT,">",\(my $x);system("ls -C");print "junk\n";close STDOUT;warn "---\n",$x,"---\n";'
+
 
 sub capture (&) {
     my($code) = shift;
@@ -38,8 +43,11 @@ sub capture (&) {
     return \%res;
 }
 
+# Super Simple Slurp Sub...
+
 sub slurp {
-    local( $/, @ARGV ) = ( wantarray ? $/ : undef, @_ ); 
+    #local( $/, @ARGV ) = ( wantarray ? $/ : undef, @_ ); 
+    local( $/, @ARGV ) = ( undef, shift ); 
     return <ARGV>;
 }
 
@@ -98,19 +106,29 @@ sub capture2 (&) {
     return \%res;
 }
 
+# TODO:
+# sub capmerge ( combine stdout+stderr in a sinle string; calls coderef )
+# sub caperr ( returns one of stderr,$@,$!,undef; calls coderef )
+#  --> hard to decide what is the best order for choosing values
+#  --> may be good to throw $@ in some situations...
+#  --> throw { stderr => '', at => '', bang => '' }
 
 # test...
 
 print "test1 ...  ", (syscap('echo "ok"')->{stdout}||'nok'), "\n";
 print "test2 ...  ", ((capture { print 'ok' } )->{stdout}||'nok'), "\n";
 
-print "test3 ...  ", ( syscap 'pwd' )->{stdout},"\n";
+print "test3 ...  ", ( syscap 'echo ok' )->{stdout},"\n";
+#print "test3 ...  ", ( syscap 'pwd' )->{stdout},"\n";
 #print "test3.a .  ", join ':', %{ syscap 'pwd' },"\n";
 #print "test3.b .  ", join ':', %{ syscap 'ls -C' },"\n";
 
 #print "test4 ...  ", join ':', %{ syscap '/bin/bash', '-c', 'echo "hi"' },"\n";
-print "test4 ...  ", ( syscap '/bin/bash', '-c', 'echo "hi"' )->{stdout},"\n";
+print "test4 ...  ", ( syscap '/bin/bash', '-c', 'echo "ok"' )->{stdout},"\n";
 
 print "test5 ...  ", ((capture { warn "ok\n" } )->{stderr}||'nok'), "\n";
 print "test6 ...  ", ((capture { die "ok\n" } )->{at}||'nok'), "\n";
+
+print "test7 ...  ", ((capture2 { die "ok\n" } )->{at}||'nok'), "\n";
+print "test8 ...  ", ((capture2 { system 'echo ok' } )->{stdout}||'nok'), "\n";
 
