@@ -1,0 +1,21 @@
+
+sub slurp { 
+    local( $/, @ARGV ) = ( wantarray ? $/ : undef, @_ ); 
+    return <ARGV>;
+}
+
+sub to_array {
+    my @array = slurp( @_ );
+    return wantarray ? @array : \@array;
+}
+
+sub to_scalar {
+    my $scalar = slurp( @_ );
+    return $scalar;
+}
+
+
+open( my $fh, $file ) or die "sudden flaming death\n"
+my $text = do { local( $/ ) ; <$fh> } ;
+
+
