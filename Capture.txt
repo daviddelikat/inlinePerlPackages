@@ -109,6 +109,7 @@ sub capture2 (&) {
 # TODO:
 # sub capmerge ( combine stdout+stderr in a sinle string; calls coderef )
 # sub caperr ( returns one of stderr,$@,$!,undef; calls coderef )
+#  --> capture ONLY stderr; perhaps let it go to the term also
 #  --> hard to decide what is the best order for choosing values
 #  --> may be good to throw $@ in some situations...
 #  --> throw { stderr => '', at => '', bang => '' }
