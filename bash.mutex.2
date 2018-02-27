@@ -1,0 +1,34 @@
+#!/bin/bash
+
+# sigh...  I'm pretty sure this one works...
+   #  TODO  write a test script...
+
+mutex=/tmp/scriptInProcess
+pidfile=$mutex/pid
+mypid=$$
+cleanup="rm -rf $mutex"
+quit="unset mutex pidfile mypid cleanup quit; exit"
+
+{
+if [ -f $mutex/pid ] ; then
+    if kill -0 `cat $pidfile ; then
+        $quit
+    else
+        $cleanup
+    fi
+fi
+
+if mkdir -p $mutex ; then
+echo $mypid > $pidfile
+else $quit ; fi
+} 2> /dev/null
+
+(
+
+### insert script here ###
+
+)
+
+$cleanup
+$quit
+

@@ -1,0 +1,90 @@
+
+ 
+ 
+if mkdir /var/lock/mylock; then
+  echo "Locking succeeded" >&2
+else
+  echo "Lock failed - exit" >&2
+  exit 1
+fi
+ 
+{{{{
+ 
+# moderately effective mutual exclusion...
+mutex=/tmp/custom.filename
+(until mkdir $mutex ; do
+  sleep 1
+done) 2> /dev/null
+ 
+###  the script ###
+ 
+# cleanup mutex so other shells can run
+rmdir $mutex
+unset mutex
+ 
+}}}}
+ 
+{{{{
+ 
+# slightly more effective mutual exclusion...
+mutex=/tmp/custom.filename
+
+if [ -f $mutex/pid ] ; then
+    if kill -0 `cat $mutex/pid` ; then
+         :
+    else
+        rm -rf $mutex
+    fi
+fi
+
+(until mkdir $mutex ; do
+  sleep 1
+done) 2> /dev/null
+
+echo $$ > $mutex/pid
+
+(   # parens place main script in sub-process
+    # if errors occur in sub-process mutex 
+    # _should_ still get removed
+
+###  the script ###
+
+) 
+
+# cleanup mutex so other shells can run
+rm -rf $mutex
+unset mutex
+ 
+}}}}
+
+{{{{
+
+mutex=/tmp/custom.filename
+
+if [ -f $mutex/pid ] ; then
+    if kill -0 `cat $mutex/pid` ; then
+         exit
+    else
+        rm -rf $mutex
+    fi
+fi
+
+(if mkdir $mutex ; then :
+else exit ; fi) 2> /dev/null
+
+echo $$ > $mutex/pid
+
+(
+
+###  insert script here ###
+
+)
+
+# cleanup mutex so other shells can run
+rm -rf $mutex
+unset mutex
+
+
+}}}}
+
+
