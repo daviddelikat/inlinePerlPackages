@@ -106,13 +106,82 @@ sub capture2 (&) {
     return \%res;
 }
 
-# TODO:
-# sub capmerge ( combine stdout+stderr in a sinle string; calls coderef )
+# capture output but send it stdout&stderr as well...
+# uses unix 'tee' utility
+
+sub captureT (&) {
+    my $cmd = shift;
+    my %res;
+    my $tfac = __::TEMPFILES->new;
+    my $stdout = $tfac->newFile;
+    my $stderr = $tfac->newFile;
+    open my $tso, '>&STDOUT';
+    open my $tse, '>&STDERR';
+    open STDERR, '|-', " tee $stderr" or die "failed to open '$stderr'";
+    open STDOUT, '|-', " tee $stdout" or die "failed to open '$stdout'";
+    local($|,$!) = (1);
+    $res{return} = eval { $cmd->() };
+    $res{bang} = $!;
+    $res{at} = $@;
+    open STDOUT, '>&'.fileno($tso);
+    open STDERR, '>&'.fileno($tse);
+    $res{stdout} = slurp($stdout);
+    $res{stderr} = slurp($stderr);
+    chomp %res;
+    return \%res;
+}
+
+
+sub capmerge (&) {
+    my $cmd = shift;
+    my %res;
+    my $tfac = __::TEMPFILES->new;
+    my $stdout = $tfac->newFile;
+    open my $tso, '>&STDOUT';
+    open my $tse, '>&STDERR';
+    pen STDOUT, '>', $stdout or die "failed to open '$stdout'";
+    open STDERR, '&>STDOUT';
+    local($|,$!) = (1);
+    $res{return} = eval { $cmd->() };
+    $res{bang} = $!;
+    $res{at} = $@;
+    open STDOUT, '>&'.fileno($tso);
+    open STDERR, '>&'.fileno($tse);
+    $res{stdout} = slurp($stdout);
+    chomp %res;
+    return \%res;
+}
+
+
 # sub caperr ( returns one of stderr,$@,$!,undef; calls coderef )
 #  --> capture ONLY stderr; perhaps let it go to the term also
 #  --> hard to decide what is the best order for choosing values
 #  --> may be good to throw $@ in some situations...
 #  --> throw { stderr => '', at => '', bang => '' }
+
+sub caperr (&) {
+    my $cmd = shift;
+    my %res;
+    my $tfac = __::TEMPFILES->new;
+    my $stderr = $tfac->newFile;
+    open my $tse, '>&STDERR';
+    open STDERR, '|-', " tee $stderr" or die "failed to open '$stderr'";
+    #open STDERR, '>', $stderr or die "failed to open '$stderr'";
+    local($|,$!) = (1);
+    $res{return} = eval { $cmd->() };
+    $res{bang} = $!;
+    $res{at} = $@;
+    open STDERR, '>&'.fileno($tse);
+    $res{stderr} = slurp($stderr);
+    chomp %res;
+    #die \%res if $res{at} ;
+    return
+	$res{stderr} or
+	$res{at}     or
+	$res{bang}   or
+	$res{return} or
+	0
+}
 
 # test...
 
