@@ -1,0 +1,55 @@
+
+
+
+sub thisMonth {
+    [qw/
+        January February March April May June July
+        August September October November December
+      /] -> [ (localtime)[4] ];
+}
+
+sub thisYear {
+    (localtime)[5] + 1900;
+}
+
+
+my $logfilename = sprintf(
+        "log/${HOSTNAME}_%02d%02d%02d%02d%02d",
+        map { $_ % 100 }                # convert year into 2 digits
+                reverse((localtime)[1 .. 5])  # min, hour, dom, mon, year
+        );
+
+
+date +%Y%m%d%H%M
+
+ 
+yyyy  mon dd
+ 
+date +"%Y %b %d"
+ 
+ 
+2hmm
+ 
+date +"%H %M"
+ 
+ 
+1hmm AP
+ 
+date +"%I %M %p"
+ 
+ 
+yyyy mon dd 2h mm
+ 
+date +"%Y %b %d %H %M"
+ 
+ 
+ 
+yyyy ddd
+ 
+date "+%Y %j"
+ 
+ 
+ 
+%n  insterts a newline charecter
+
+
