@@ -1,0 +1,37 @@
+
+# this needs a test...
+# I should write some inline testing for all of my inline perl scripts...
+
+my $c = 'c';
+my $o = 'o';
+
+sub catch(&;$) { [ $c, $_[0] ] }
+sub or_try(&;$) { [ $o, @_ ] }
+sub try(&;$) {
+    my ($try, $next) = @_;
+    my @errors;
+    my $ret;
+    while( $try ) {
+	my $error;
+	local $SIG{INT} = sub { die "Got SIGINT\n" };
+	local $SIG{KILL} = sub { die "Got SIGKILL\n" };
+	local($@);
+	$ret = eval { $try->() };
+	$error = $@;
+	return $ret unless $error;
+	push @errors, $error if $error;
+	if (@errors && $next) {
+	    $SIG{INT} = sub { warn 'Ignoring SIGINT, caught error.' };
+	    $SIG{KILL} = sub { warn 'Ignoring SIGKILL, caught error.' };
+	    if( $next->[0] eq $o ) {
+		(undef,$try,$next) = @$next;
+	    } else {
+		local $_ = join ';', @finerr;
+		$ret = $next->[1]->();
+	    }
+	}
+    }
+    $@ = join ';', @errors;
+    return undef;
+}
+

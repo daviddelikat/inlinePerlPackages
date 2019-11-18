@@ -1,0 +1,13 @@
+
+can I create a module that will include code from here?
+
+something like:
+
+use InlinePerl <filename>;
+
+it should eval the referenced code in the context of the calling module.
+
+probably would change the module extensions to ipm or something else
+that distinguishes them from the non-module items; or create a map
+in the inlineperl module that helps it find the code it needs to include.
+
