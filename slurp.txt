@@ -1,21 +1,75 @@
 
+# no error checking...
 sub slurp { 
     local( $/, @ARGV ) = ( wantarray ? $/ : undef, @_ ); 
     return <ARGV>;
 }
 
-sub to_array {
+# min error checking
+sub slurp { 
+    my $file = shift;
+    open my $fh, '<', $file or die "failed to open '$file' for read"
+    local( $/ );
+    return <$fh>
+}
+
+# force scalar
+sub slurp { 
+    my $file = shift;
+    open my $fh, '<', $file or die "failed to open '$file' for read"
+    my $text = do { local( $/ ) ; <$fh> } ;
+    return $text;
+}
+
+# max error checking
+# no need to test for errors on close because we did not write
+# and so cannot lose anything if the close fails.
+sub slurp { 
+    my $file = shift;
+    open my $fh, '<', $file or die "failed to open '$file' for read"
+    my $size = -s $fh;
+    return '' if $size == 0; # why read an empty file?
+    my $text;
+    read $fh, $text, $size or die "failed to read from '$file' $?";
+    return $text;
+}
+# TODO: there is some benefit to having a version with an explicit close
+# I just do not feel like writing it now...
+
+
+# extensions to slurp
+sub slurp_array { # force an array
     my @array = slurp( @_ );
     return wantarray ? @array : \@array;
 }
 
-sub to_scalar {
+sub slurp_aref { # force an array ref
+    my @array = slurp( @_ );
+    return \@array;
+}
+
+sub slurp_scalar {  # force a scalar
     my $scalar = slurp( @_ );
-    return $scalar;
+    #return $scalar; # not technically needed
 }
 
 
-open( my $fh, $file ) or die "sudden flaming death\n"
+open( my $fh, '<', $file ) or die "sudden flaming death\n"
 my $text = do { local( $/ ) ; <$fh> } ;
 
+# inverse of slurp...
+
+sub burp {
+    my($file,$text) = @_;
+    open my $fh, '>', $file or die "failed to open '$file', $?";
+    print $fh $text;
+}
+
+# MAX error checking...
+sub burp {
+    my($file,$text) = @_;
+    open my $fh, '>', $file or die "failed to open '$file', $?";
+    print $fh $text or die "failed to write text to '$file', $?";
+    close $fh or die "failed to close '$file', $?";
+}
 
