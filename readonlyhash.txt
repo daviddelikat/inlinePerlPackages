@@ -1,0 +1,21 @@
+
+
+
+
+package ReadOnlyHash;
+
+use Tie::StdHash;
+
+our @ISA = 'Tie::StdHash';
+
+sub TIEHASH  {
+    my $storage = bless $_[1], $_[0];
+    return $storage
+}
+
+sub STORE    {
+    die 'tried to write to a readonly hash';;
+}
+
+
+
