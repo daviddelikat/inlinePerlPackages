@@ -4,7 +4,7 @@
 
 package ReadOnlyHash;
 
-use Tie::StdHash;
+use Tie::Hash;
 
 our @ISA = 'Tie::StdHash';
 
