@@ -4,6 +4,6 @@ only the essentials function exporter:
 sub import {
     my $caller = caller;
     no strict;
-    *{"$caller\::my_config"} = my_config;
+    *{"$caller\::my_config"} = \&my_config;
 }
 
