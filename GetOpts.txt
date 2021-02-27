@@ -30,4 +30,69 @@ GetOptions ("library=s" => \@libfiles);
 
 die "!FINISH";   # use this to tell GetOptions to stop processing options ( like '--' )
 
+#  get opts subcommand
+
+use Getopt::Long::Subcommand; # exports GetOptions
+ 
+my %opts;
+my $res = GetOptions(
+ 
+    summary => 'Summary about your program ...',
+ 
+    # common options recognized by all subcommands
+    options => {
+        'help|h|?' => {
+            summary => 'Display help message',
+            handler => sub {
+                my ($cb, $val, $res) = @_;
+                if ($res->{subcommand}) {
+                    say "Help message for $res->{subcommand} ...";
+                } else {
+                    say "General help message ...";
+                }
+                exit 0;
+            },
+        'version|v' => {
+            summary => 'Display program version',
+            handler => sub {
+                say "Program version $main::VERSION";
+                exit 0;
+            },
+        'verbose' => {
+            handler => \$opts{verbose},
+        },
+    },
+ 
+    # list your subcommands here
+    subcommands => {
+        subcmd1 => {
+            summary => 'The first subcommand',
+            # subcommand-specific options
+            options => {
+                'foo=i' => {
+                    handler => \$opts{foo},
+                },
+            },
+        },
+        subcmd1 => {
+            summary => 'The second subcommand',
+            options => {
+                'bar=s' => \$opts{bar},
+                'baz'   => \$opts{baz},
+            },
+        },
+    },
+ 
+    # tell how to complete option value and arguments. see
+    # Getopt::Long::Complete for more details, the arguments are the same
+    # except there is an additional 'subcommand' that gives the subcommand
+    # name.
+    completion => sub {
+        my %args = @_;
+        ...
+    },
+ 
+);
+die "GetOptions failed!\n" unless $res->{success};
+say "Running subcommand $res->{subcommand} ...";
 
