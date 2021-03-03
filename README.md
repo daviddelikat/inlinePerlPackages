@@ -11,4 +11,3 @@ handy.
 Let me know if you find these useful or if you see any improvements of any kind.
 
 david-delikat@usa.net
-
