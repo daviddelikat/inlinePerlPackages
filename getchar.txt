@@ -1,0 +1,71 @@
+
+=pod
+
+allows a script to check for input from the user without
+stopping processing.  the user still needs to press return
+but the program does not wait for the user.
+
+in order to improve on this the terminal needs to be
+in raw mode... which can be accomplished byt these two lines.
+
+=cut
+
+system( 'stty raw' );
+END { system('stty sane'); print "\r"; }
+#END { system('stty sane;clear'); }
+
+=pod
+
+note that while in 'raw' mode you will need to use \r\n to get
+a carriage return with your line feeds...
+
+it is important to make sure that the enable command happens early
+in the script, preferably only once.  if the above fails use a
+BEGIN or INIT block
+
+more importantly the disable command needs to happen no matter how
+your prgram exists so putting it in an END block may be the best idea.
+unless you have IO going on during destruction it probably does not
+matter how late it runs, you just dont want the special mode enabled
+when the user gets control. ( the carriage return at the end helps
+make the transition more normal for the user, if you need better
+clanup clear the screen )
+
+=cut
+
+sub getchar {
+    my $rin = '';
+    vec($rin, fileno(STDIN),  1) = 1;
+    if(select($rin, undef, $rin, 0) > 0) {
+        if(sysread(STDIN,$ch,1)) {
+	    return $ch;
+	}
+    }
+    return '';
+}
+
+sub test {
+    while( 1 ) {
+         print "doing stuff ... "; sleep 1;
+	 while( $c = getchar() ) {
+	     print " you pressed '$c' ";
+	     exit if $c eq 'q';
+	 }
+    }
+}
+
+sub askuser {
+    my $rin = '';
+    vec($rin, fileno(STDIN),  1) = 1;
+    while(select($rin, undef, undef, 0) > 0) {
+        if(sysread(STDIN,$c,1)) {
+            #print " you pressed '$c' ";
+            exit if $c eq 'q';
+        }
+    }
+}
+
+$| = 1;
+
+test;
+
