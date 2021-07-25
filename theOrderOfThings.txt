@@ -43,7 +43,7 @@ EOP
 
 
 # yet another approach...
-# demonstation of ${^GLOBAL_PHASE}
+# demonstration of ${^GLOBAL_PHASE}
 # also copied from official docs ( man perlvar )
 
 perl <<EOP
