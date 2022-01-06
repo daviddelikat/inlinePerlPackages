@@ -1,0 +1,8 @@
+
+create an aliasof a function in a different package:
+
+  eval " *$target\::ctrl = \\&ctrl ";
+
+
+TODO:   create an alias of an entire package...
+and other aliases...
