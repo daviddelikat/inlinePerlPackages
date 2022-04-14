@@ -6,5 +6,6 @@ more files with examples
 test code
 add a min version of more entries
 code examples for vereous alias mechanisms
+simple ini parser
 
 
