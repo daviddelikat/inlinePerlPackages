@@ -1,0 +1,12 @@
+
+
+simple way to pull n a bunch of plugins
+
+use IO::All;
+
+while( io->dir( $plugin_dir )->all ) {
+    eval "require $_";
+    warn $@ if $@;
+}
+
+

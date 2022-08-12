@@ -1,0 +1,36 @@
+
+# partially untested
+
+package IM::j9::config;
+
+sub _parse {
+  my $s = 'main';
+  my $r;
+  for my $l ( @_ ) {
+    if( $l =~ /\[\s*(\w+)\s*\]/ ){
+      $s = $1;
+    } elsif( $l =~ /(\w+)\s*=\s*(.*)\s*$/ ) {
+      $r->{$s}{$1}=$2;
+    }
+  }
+  return $r;
+}
+
+my $configdata = _parse(my @x=<'config'>);
+sub new { return $_[0]; }
+sub get { return $configdata->{$_[1]}{$_[2]}; }
+
+=begin test
+
+eval {
+  my $p = 'IM::j9::config' ;
+  my $s1 = $p->new;
+  isa_ok $s1, $p;
+  is $s1->get( test => 'test' ), 'test', 'get works';
+};
+is $@, '', 'no errors from eval';
+
+=cut
+
+
+

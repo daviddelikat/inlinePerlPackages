@@ -82,3 +82,14 @@ our $destruct = Print::Phase->new(
 
 EOP
 
+result:
+
+compile-time: START
+check-time: CHECK
+init-time: INIT
+run-time: RUN
+lexical variables are garbage collected before END: RUN
+end-time: END
+package variables are garbage collected after END: DESTRUCT
+
+

@@ -1,0 +1,41 @@
+
+a simple cache with cleanup
+
+note: as yet untested...
+
+
+usage:
+
+   cache('key');  # return undef or the data that belongs to the key
+   cache(key=>$data) # assigne thedata to the key; return the data
+
+sub cache {
+  my($k,$v) = @_;
+  state %c;   # 'state' requires 'Modern::Perl'
+  state $n ||= time() + 5;
+  my $cln;
+  if( time() > $n ) {
+    $n = time() + 5;
+        # guard will cause cleanup to run after function exits
+    $cln = guard(sub {  # see GUARD.txt
+	# note that 'delete' could be changed to 'weaken'
+	# in order to keep the cache if the object is 
+	# still in use elsewhere [ but then 'unweaken'
+	# would be wise in the fetch part of the function
+        map { delete $c{$_[0]} }
+            map { time() > $c{$_}[1] ? $_ : () }
+            keys %c;
+    } );
+  }
+  if( defined $v ) {
+      $c{$k} = [ $v, time() + 5 ];
+      return $v;
+  }
+  if( defined $c{$k} ) {
+    $c{$k}[1] = time() + 5;
+    return $c{$k}[0];
+  }
+  return undef;
+}
+
+

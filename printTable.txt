@@ -10,10 +10,10 @@ print out a very simple table based on a hash of values.
 sub printTable {
     my %h = %{$_[0]};
     my $width=0;
-    # pick A:
+	# pick A:
     sub max { $_[0] >= $_[1] ? $_[0] : $_[1] }
     $width = max($width,length $_) for keys %h;
-    # or B:
+	# or B:
     my $m = sub { $_[0] >= $_[1] ? $_[0] : $_[1] }
     $width = $m->($width,length $_) for keys %h;
     for my $k ( keys %h ) {
