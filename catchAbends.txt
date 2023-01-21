@@ -1,0 +1,27 @@
+
+=pod
+
+this END block catches ABEND's and runs git pull
+so that a remote programmer can push code to the repository
+and fix the problem without needing to log into the server.
+
+the last line ensures that the ABEND is propigated
+to the final exit
+
+this code should be inserted as early as possible in the
+module so that it will run for nearly any kind of failure
+
+=cut
+
+END {
+  if( $? != 0 ) {
+    my $rc = $?;
+    print localtime . " $0 failed($rc) running 'git pull'\n";
+    $bin_dir = $0;
+    $bin_dir =~ s[/[^/]*$][];
+    print "cd $bin_dir && git pull\n";
+    system "cd $bin_dir && git pull";
+    print "reset \$? = $rc\n";
+    $? = $rc;
+  }
+}
