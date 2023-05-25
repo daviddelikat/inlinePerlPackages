@@ -1,10 +1,11 @@
 
 
-simple way to pull n a bunch of plugins
+simple way to pull in a bunch of plugins
 
 use IO::All;
 
 while( io->dir( $plugin_dir )->all ) {
+    next unless /\.pm$/;
     eval "require $_";
     warn $@ if $@;
 }
