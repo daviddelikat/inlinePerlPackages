@@ -16,7 +16,7 @@ so that later instances can resume processing...
 
 sub add {
 # add an object to the STATE class
-# object must imlement required methods for save/resume
+# object must implement required methods for save/resume
 }
 
 sub _stateFile {

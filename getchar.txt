@@ -6,7 +6,7 @@ stopping processing.  the user still needs to press return
 but the program does not wait for the user.
 
 in order to improve on this the terminal needs to be
-in raw mode... which can be accomplished byt these two lines.
+in raw mode... which can be accomplished by these two lines.
 
 =cut
 
@@ -24,12 +24,12 @@ in the script, preferably only once.  if the above fails use a
 BEGIN or INIT block
 
 more importantly the disable command needs to happen no matter how
-your prgram exists so putting it in an END block may be the best idea.
+your program exists so putting it in an END block may be the best idea.
 unless you have IO going on during destruction it probably does not
 matter how late it runs, you just dont want the special mode enabled
 when the user gets control. ( the carriage return at the end helps
 make the transition more normal for the user, if you need better
-clanup clear the screen )
+cleanup clear the screen )
 
 =cut
 

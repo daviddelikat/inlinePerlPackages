@@ -44,7 +44,7 @@ sub qucc {  # quick-un-camel-case
 		:($_)		# otherwise just return it
 	    }
 	    split /([A-Z]+)/,	# split on one or more uppercase, parens cause
-	    			# matched texty to be included in the list
+	    			# matched text to be included in the list
 	    	lcfirst(shift)  # change first char to lowercase, otherwise we may
 				# get a '-' at the beginning of the token
 }

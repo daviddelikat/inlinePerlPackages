@@ -22,34 +22,25 @@ my $logfilename = sprintf(
 
 date +%Y%m%d%H%M
 
- 
 yyyy  mon dd
- 
-date +"%Y %b %d"
- 
- 
-2hmm
- 
-date +"%H %M"
- 
- 
-1hmm AP
- 
-date +"%I %M %p"
- 
- 
-yyyy mon dd 2h mm
- 
-date +"%Y %b %d %H %M"
- 
- 
- 
-yyyy ddd
- 
-date "+%Y %j"
- 
- 
- 
-%n  insterts a newline charecter
 
+date +"%Y %b %d"
+
+2hmm
+
+date +"%H %M"
+
+1hmm AP
+
+date +"%I %M %p"
+
+yyyy mon dd 2h mm
+
+date +"%Y %b %d %H %M"
+
+yyyy ddd
+
+date "+%Y %j"
+
+%n  insterts a newline charecter
 

@@ -129,7 +129,7 @@ sub retry { $_[0]->fail && $_[0]{r} < 3 }
 sub success { $_[0]{d} and not $_[0]{f} }
 
 sub run {
-    return $_[0]  unless -f $_[0]{s}; # in case it disapears...
+    return $_[0] unless -f $_[0]{s}; # in case it disapears...
     if( system( 'cp', $_[0]{s}, $_[0]{t} ) ) {
         $_[0]{f} = 1;
         $_[0]{r}++;

@@ -1,5 +1,5 @@
 
-create an aliasof a function in a different package:
+create an alias of a function in a different package:
 
   eval " *$target\::ctrl = \\&ctrl ";
 

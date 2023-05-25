@@ -139,7 +139,7 @@ sub capmerge (&) {
     my $stdout = $tfac->newFile;
     open my $tso, '>&STDOUT';
     open my $tse, '>&STDERR';
-    pen STDOUT, '>', $stdout or die "failed to open '$stdout'";
+    open STDOUT, '>', $stdout or die "failed to open '$stdout'";
     open STDERR, '&>STDOUT';
     local($|,$!) = (1);
     $res{return} = eval { $cmd->() };

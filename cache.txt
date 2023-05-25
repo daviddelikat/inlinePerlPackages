@@ -7,11 +7,11 @@ note: as yet untested...
 usage:
 
    cache('key');  # return undef or the data that belongs to the key
-   cache(key=>$data) # assigne thedata to the key; return the data
+   cache(key=>$data) # assign the data to the key; return the data
 
 sub cache {
   my($k,$v) = @_;
-  state %c;   # 'state' requires 'Modern::Perl'
+  state %c;   # 'state' requires 'Modern::Perl' [ TODO find the 'use v??' for 'state' ]
   state $n ||= time() + 5;
   my $cln;
   if( time() > $n ) {
